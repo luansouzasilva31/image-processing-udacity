@@ -32,19 +32,31 @@ def apply_filter(image: np.ndarray, custom_kernel: np.ndarray = None,
     filtered = np.zeros(shape, dtype=np.uint8)
 
     # apply kernel
-    # TODO: vetorizar
-    for j in range(filtered.shape[0]):
-        for k in range(filtered.shape[1]):
-            region = input_image[j:j+h_kernel, k:k+w_kernel]
-            r_conv = np.multiply(kernel, region)
+    # # TODO: vetorizar
+    # for j in range(filtered.shape[0]):
+    #     for k in range(filtered.shape[1]):
+    #         region = input_image[j:j+h_kernel, k:k+w_kernel]
+    #         r_conv = np.multiply(kernel, region)
 
-            filtered[j, k] = np.mean(r_conv, axis=(0, 1), keepdims=True)
+    #         filtered[j, k] = np.mean(r_conv, axis=(0, 1), keepdims=True)
+
+    # get regions
+    regions = np.zeros((filtered.shape[0], filtered.shape[1], 
+                        h_kernel, w_kernel))
+    for i in range(filtered.shape[0]):
+        for j in range(filtered.shape[1]):
+            regions[i, j] = input_image[i:i+h_kernel, j:j+w_kernel]
+    i_kernel = np.expand_dims(kernel, axis=(0, 1))
+
+    # apply vectorization
+    filtered = np.multiply(i_kernel, regions)
+    filtered = np.mean(filtered, axis=(-2, -1)).astype(np.uint8)
 
     return filtered
 
 
 if __name__ == '__main__':
-    path = '/home/luansouzasilva/Imagens/zeze_os_incriveis_capa.jpg'
+    path = 'c:\\Users\\luans\\Pictures\\pombo.jpg'
     image = cv2.imread(path, 0)
 
     filtered = apply_filter(image)
