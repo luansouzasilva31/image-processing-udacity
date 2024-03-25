@@ -3,18 +3,37 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def gaussian_kernel(ksize: int, sigma: float):
+    ax = np.linspace(-(ksize - 1) / 2., (ksize - 1) / 2., ksize)
+    xx, yy = np.meshgrid(ax, ax)
+
+    kernel = np.exp(-0.5 * (np.square(xx) + np.square(yy)) / np.square(sigma))
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    surf = ax.plot_surface(xx, yy, kernel, rstride=1, cstride=1,
+                           antialiased=True, facecolor='red')
+    plt.show()
+
+    return kernel / np.sum(kernel)
+
+
+def uniform_kernel(ksize: int):
+    kernel = np.ones((ksize, ksize))
+
+    return kernel
+
+
 def apply_filter(image: np.ndarray, custom_kernel: np.ndarray = None,
                  padding: str = 'same'):
+    # TODO: include stride
     input_image = image.copy()
 
     kernel = custom_kernel
     if kernel is None:
         print('Set kernel to 5x5 uniform distribution.')
-        kernel = np.array([[1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1]])
+        kernel = uniform_kernel((31, 31))
 
     h_kernel, w_kernel = kernel.shape[:2]
     ij, ik = h_kernel // 2, w_kernel // 2  # indexes
@@ -44,6 +63,8 @@ def apply_filter(image: np.ndarray, custom_kernel: np.ndarray = None,
 
 
 if __name__ == '__main__':
+    gkernel = gaussian_kernel(31, 4)
+
     path = '/home/luansouzasilva/Imagens/zeze_os_incriveis_capa.jpg'
     image = cv2.imread(path, 0)
 
